@@ -24,46 +24,62 @@ module.exports = function(app){
   // ---------------------------------------------------------------------------
 
   app.post("/api/friends", function(req, res) {
-    var newFriend = req.body;
+    //holds key values that are submitted by client
+    //holds the new object data submitted through form  
+    var newMatch = req.body;
 
-    for(var i = 0; i < newFriend.scores.length; i++) {
-			if(newFriend.scores[i] == "1 (Strongly Disagree)") {
-				newFriend.scores[i] = 1;
-			} else if(newFriend.scores[i] == "5 (Strongly Agree)") {
-				newFriend.scores[i] = 5;
-			} else {
-				newFriend.scores[i] = parseInt(newFriend.scores[i]);
-			}
+    //get the length of the scores array submitted
+    for(var i = 0; i < newMatch.scores.length; i++) {
+        //object scores with a string in it set a integer to the score key
+		if(newMatch.scores[i] == "1 (Strongly Disagree)") {
+			newMatch.scores[i] = 1;
+		} else if(newMatch.scores[i] == "5 (Strongly Agree)") {
+			newMatch.scores[i] = 5;
+		} else {
+			newMatch.scores[i] = parseInt(newMatch.scores[i]); //parse the score keys to make integers
 		}
+	}
 
-		var differencesArray = [];
-
+    //create a array variable that will hold the difference in scores
+	var scoreDifferences = [];
+        //for loop for each array in the current friends object
 		for(var i = 0; i < friendsTable.length; i++) {
-
-			var comparedFriend = friendsTable[i];
-			var totalDifference = 0;
+            //create variable to hold current friends object
+			var compareMatches = friendsTable[i];
+            //create total variable to begin at 0
+			var totalDiff = 0;
 			
-			for(var k = 0; k < comparedFriend.scores.length; k++) {
-				var differenceOneScore = Math.abs(comparedFriend.scores[k] - newFriend.scores[k]);
-				totalDifference += differenceOneScore;
+            //run a for loop using the friends.scores object array
+			for(var k = 0; k < compareMatches.scores.length; k++) {
+                //returns absolute value
+				var diffScore = Math.abs(compareMatches.scores[k] - newMatch.scores[k]);
+                //total diff equals different score
+				totalDiff += diffScore;
 			}
-
-			differencesArray[i] = totalDifference;
+            //set scoreDifferences array equal tot he totalDiff
+			scoreDifferences[i] = totalDiff;
 		}
 
-		var bestFriendNum = differencesArray[0];
-		var bestFriendIndex = 0;
+        //create variable equal to the scoreDifference[0] first index
+		var matchScore = scoreDifferences[0];
+        //create variable equal to 0
+		var matchIndex = 0;
 
-		for(var i = 1; i < differencesArray.length; i++) {
-			if(differencesArray[i] < bestFriendNum) {
-				bestFriendNum = differencesArray[i];
-				bestFriendIndex = i;
+        //create a for loop 
+		for(var i = 1; i < scoreDifferences.length; i++) {
+            //if scoredifferences is less than matchscore
+			if(scoreDifferences[i] < matchScore) {
+                //set the matchscore eault to the scoreDiff
+				matchScore = scoreDifferences[i];
+				matchIndex = i;
 			}
 		}
 
-		friendsTable.push(newFriend);
+        //push new object data to the friends object
+		friendsTable.push(newMatch);
 
-		res.json(friendsTable[bestFriendIndex]);
+        //show the new object in the api
+		res.json(friendsTable[matchIndex]);
 
 	})
 }
